@@ -512,6 +512,22 @@ class AppApi extends Process implements Module {
 
     public function handleApiRequest(HookEvent $event) {
         if ($this->checkIfApiRequest()) {
+            // Save url, this will be changed by page creation below
+            $url = wire('input')->url;
+            
+            $page = new Page();
+            $page->id = wire('config')->http404PageID;
+            $page->name = 'api';
+            $page->template = new Template();
+            $this->wire('page', $page);
+            
+            // Reset url
+            wire('input')->url = $url;
+
+            // trigger ready in ProcessPageView
+            $processPageView = $event->object;
+            $processPageView->ready();
+
             $this->apiCall = true;
             Auth::getInstance()->initApikey();
             $router = new Router();
